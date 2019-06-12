@@ -11,4 +11,4 @@ first time, would have tried my own implementations anyhow. As one should.
 
 Probability of data under Inifinite Alleles and Infinite Sites models.
 
-- Notebook
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Model_proba.ipynb)
