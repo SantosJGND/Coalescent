@@ -5,6 +5,7 @@ from plotly import tools
 from plotly.offline import iplot
 import scipy
 
+from structure_tools.Coal_probab import *
 
 def plot_Ewens(config_complex, range_theta):
     Ncols= 2
