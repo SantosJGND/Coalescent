@@ -103,8 +103,6 @@ def plot_rec_InfSites(point_up,root_lib,funk,titles,range_theta,height= 500,widt
             Browse= runUp_use(point_up,root_lib,layer=0,start=0,Theta= x,prob_vec= [])
             probe_rec= sum(Browse)
             
-            
-            
             Inf_sites_est.append(probe_rec)
             there.append(x)
         
