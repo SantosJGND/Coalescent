@@ -123,7 +123,6 @@ def plot_rec_InfSites(point_up,root_lib,funk,titles,range_theta,height= 500,widt
             name= titles[gp]
         )
         
-
         fig_subplots.append_trace(trace1, pos1, pos2)
         
         fig_subplots['layout']['yaxis' + str(gp + 1)].update(title= 'P')
