@@ -6,8 +6,16 @@ from plotly.offline import iplot
 import scipy
 
 from structure_tools.Coal_probab import *
+from structure_tools.Coal_tools import get_sinks
 
 import time
+
+
+import collections
+
+def recursively_default_dict():
+        return collections.defaultdict(recursively_default_dict)
+
 
 def plot_Ewens(config_complex, range_theta):
     Ncols= 2
@@ -137,5 +145,60 @@ def plot_rec_InfSites(point_up,root_lib,funk,titles,range_theta,height= 500,widt
     
     fig['layout'].update(height= height,width= width)
     
+    
+    iplot(fig)
+
+
+def plot_InfSites_mrca(mrcas,point_up,root_lib,range_theta,height= 500,width= 900):
+    
+    from structure_tools.Coal_tools import tree_descent
+    
+    Ncols= 1
+    titles= [''.join([str(x) for x in y]) for y in mrcas]
+    
+    fig= []
+
+    for gp in range(len(titles)):
+        
+        title= titles[gp]
+
+        sink, starters= get_sinks(mrcas[gp],root_lib,point_up)
+        
+        t1 = time.time()
+        if len(starters):
+
+            Inf_sites_est= []
+            there= []
+        
+            for thet in range_theta:
+                
+                
+                node_weigths, paths_reverse = tree_descent(root_lib,point_up,sink,init= starters,Theta= thet)
+                
+                probe_rec= node_weigths[0][0]
+
+                Inf_sites_est.append(probe_rec)
+                there.append(thet)
+        
+        
+            trace1= go.Scatter(
+                y= Inf_sites_est,
+                x= there,
+                mode= 'markers',
+                name= titles[gp]
+            )
+
+            fig.append(trace1)
+    
+    
+    layout = go.Layout(
+        title= title,
+        xaxis= dict(
+            title= 'Theta'
+        ),
+        yaxis= dict(
+            title= 'P'
+        )
+    )
     
     iplot(fig)

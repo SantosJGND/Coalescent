@@ -88,3 +88,5 @@ def Ewens_recurs(config_vec,theta,prob_array,Pin,prob_bound = 1):
             Ewens_recurs(new_conf,theta,prob_array,prob_next)
     
     return prob_array
+
+
