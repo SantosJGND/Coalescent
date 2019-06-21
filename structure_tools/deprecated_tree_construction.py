@@ -341,3 +341,171 @@ def tree_construct(bogus1,bogus2,layer=0,start=0,Theta= 1,prob_vec= []):
 
 
 
+##################################################################
+##################################################################
+##################################################################
+
+
+from scipy.special import comb
+
+def tree_descent_II(root_lib,point_up,sink,init= [0],Theta= 1,Nt= 1000,mu= 9e-8):
+
+    edge_weights= recursively_default_dict()
+    paths= recursively_default_dict()
+    paths_where= recursively_default_dict()
+    node_bins= recursively_default_dict()
+    
+    for layer in list(range(1,sink + 1))[::-1]:
+        
+        #print('layer: {}'.format(layer))
+        where_to= point_up[layer - 1]
+        
+        if layer == sink:
+            starters= init
+        else:
+            starters= list(set(where_to[:,1]))
+        #print(where_to)
+        
+        for desc in list(set(where_to[:,1])):
+            
+            ###
+            #print(packet)
+            ###
+            
+            point_up_house= where_to[where_to[:,1] == desc]
+    
+            #point_up[layer].extend(point_up_house)
+            #point_up_house= np.array(point_up_house)
+
+            if not len(paths):
+                paths= {
+                    0: 1
+                }
+                ## this will store time per path
+                paths_vector= [1]
+
+                paths_where[layer][desc]= [1]
+                node_bins[layer][desc]= 1
+            
+            current_bins= bin(node_bins[layer][desc])[2:]
+            current_bins= np.array(list(current_bins),dtype= int)
+            
+            paths_ref= np.where(current_bins == 1)[0]
+            path_cost= [paths_vector[x] for x in paths_ref]
+            
+            for row in range(point_up_house.shape[0]):
+                pack= list(paths_where[layer][desc])
+
+                here= desc #point_up_house[row,1]
+                node_next= np.array(root_lib[layer][here])
+
+                who_lost= point_up_house[row,2] # hap set that originates the mutation / coalescent event
+                hap_split= node_next[node_next[:,0] == who_lost] # hap set row
+                
+                ### paths attention
+                
+                if row > 0:
+                    new_entry= len(paths)
+                    while new_entry in paths.keys():
+                        new_entry += 1
+                    #paths[new_entry]= (0,0)
+                    
+                    new_paths= list(paths_ref)
+                    extention= list(np.array(list(range(len(paths_ref)))) + len(paths_vector))                    
+                    new_paths.extend(extention)
+                    extention= [paths_vector[x] for x in paths_ref]
+                    paths_vector.extend(extention)
+                
+                else:
+                    new_paths= list(paths_ref)
+                    extention= list(np.array(list(range(len(paths_ref) - 1))) + len(paths_vector))
+                    new_paths.extend(extention)
+                    
+                    extention= [paths_vector[x] for x in paths_ref[1:]]
+                    paths_vector.extend(extention)
+                    
+                    
+                going= point_up_house[row,0]
+                
+                ###
+                packet= list(root_lib[layer-1][going])
+                packet= np.array(packet)
+                nsamp= sum(packet[:,1]) ## Samp next AC
+                
+                mut_prob= prob_mut(Theta,nsamp)
+                coal_prob= prob_coal(Theta,nsamp)
+
+                prob_vec= [mut_prob,coal_prob]
+                
+                ### mut proportion
+                reff= root_lib[layer-1][going]
+                reff_sing= reff[reff[:,1] == 1]
+                
+                mut_prop= reff_sing.shape[0] / reff.shape[0]
+                
+                ###
+                ###
+                nsampn= sum(root_lib[layer][desc][:,1]) ### Samp this AC
+                
+                ####
+                if point_up_house[row,3]== 1:
+                    ### Ave_time
+                    ave_time_coal= Nt / comb(nsamp, 2, exact=True)
+                    ave_tme= [0,ave_time_coal]
+                    
+                    prob_split= (hap_split[0,1]) / nsampn
+                
+                else:
+                    ave_time_mut= 1 / (2 * Nt * mu)
+                    ave_tme= [ave_time_mut,0]
+                    prob_split= mut_prop
+                
+                ###
+                pack= [x * prob_vec[point_up_house[row,3]] * prob_split for x in pack]
+                
+                ### path times
+                for lin in new_paths:
+                    
+                    paths_vector[lin] += ave_tme[point_up_house[row,3]]
+                
+                if going not in node_bins[layer - 1].keys():
+                    save= np.zeros(len(paths_vector),dtype= int)
+                    save[new_paths]= 1
+                    save= ''.join([str(x) for x in save])
+                    save= int(save,2)
+                    node_bins[layer - 1][going]= save
+                
+                else:
+                    ex_bins= bin(node_bins[layer- 1][going])[2:]
+                    ex_bins= np.array(list(current_bins),dtype= int)
+                    ex_ref= list(np.where(current_bins == 1)[0])
+                    
+                    new_paths.extend(ex_ref)
+                    save= np.zeros(len(paths_vector),dtype= int)
+                    save[new_paths]= 1
+                    save= ''.join([str(x) for x in save])
+                    save= int(save,2)
+                    node_bins[layer - 1][going]= save
+                    
+                ###
+
+                #if going not in paths_where[layer - 1].keys():
+                #    paths_where[layer - 1][going]= pack
+
+                #else:
+                #    paths_where[layer - 1][going].extend(pack)
+
+
+
+        #if len(edge_weights) == 0:
+        #    edge_weights[sink][0] = 1
+        #    paths[0]= (0,0)
+
+        #for desc in paths_where[layer - 1].keys():
+        #    edge_weights[layer - 1][desc]= sum(paths_where[layer - 1][desc])
+        #    paths_where[layer - 1][desc]= [sum(paths_where[layer - 1][desc])]
+            
+
+    return edge_weights, paths_where, node_bins, paths_vector
+    
+

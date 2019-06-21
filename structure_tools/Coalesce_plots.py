@@ -146,6 +146,7 @@ def plot_rec_InfSites(point_up,root_lib,funk,titles,range_theta,height= 500,widt
     fig['layout'].update(height= height,width= width)
     
     
+    
     iplot(fig)
 
 
