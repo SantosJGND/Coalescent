@@ -371,13 +371,13 @@ def get_ori_graph(root_lib,edges,node_list,present= True,
 
 
     ### colors
-    colz= ['rgb(0,0,205)']*len(labels)
+    colz= ['rgb(186,85,211)']*len(labels)
 
     if present:
         list_p= [x for x in range(len(node_list)) if ''.join([str(g) for g in leaves[node_list[x]]]) in str_data]
         print(list_p)
         for h in list_p:
-            colz[h]= 'rgb(186,85,211)'
+            colz[h]= 'rgb(0,0,205)'
 
     if root:
         where_root= node_list.index(-1)
