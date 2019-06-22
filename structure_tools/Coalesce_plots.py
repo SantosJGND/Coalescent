@@ -203,3 +203,131 @@ def plot_InfSites_mrca(mrcas,point_up,root_lib,range_theta,height= 500,width= 90
     )
     
     iplot(fig)
+
+
+
+
+
+
+def plot_phyl_net(data_phyl,leaves,node_list,edges,nodes_as_seqs= True,root= True):
+    import networkx
+
+    G=nx.Graph()
+
+    G.add_nodes_from(node_list)
+    G.add_edges_from(edges)
+
+    pos= nx.fruchterman_reingold_layout(G)
+
+    ###
+    ### labels 
+    for nd in node_list:
+        if nd not in leaves.keys():
+            leaves[nd]= []
+
+    if nodes_as_seqs:
+        labels= []
+        for nd in node_list:
+            if len(leaves[nd]):
+                seqs= [data_phyl[x] for x in leaves[nd]]
+                seqs= [''.join([str(x) for x in z]) for z in seqs]
+                seqs= '\n'.join(seqs)
+                labels.append(seqs)
+            else:
+                labels.append('')
+
+    else:
+
+        labels= [''.join([str(x) for x in leaves[z]]) for z in node_list]
+    
+    ### colors
+    colz= ['rgb(0,0,205)']*len(labels)
+    if root:
+        where_root= node_list.index(-1)
+        colz[where_root]= 'rgb(240,0,0)'
+        labels[where_root] = 'root: ' + labels[where_root]
+    
+    ##
+    Xn=[pos[k][0] for k in pos.keys()]
+    Yn=[pos[k][1] for k in pos.keys()]
+
+    trace_nodes=dict(type='scatter',
+                     x=Xn, 
+                     y=Yn,
+                     mode='markers',
+                     marker=dict(size=28, color=colz),
+                     text=labels,
+                     hoverinfo='text')
+
+    Xe=[]
+    Ye=[]
+
+    for e in G.edges():
+        Xe.extend([pos[e[0]][0], pos[e[1]][0], None])
+        Ye.extend([pos[e[0]][1], pos[e[1]][1], None])
+
+    trace_edges=dict(type='scatter',
+                 mode='lines',
+                 x=Xe,
+                 y=Ye,
+                 line=dict(width=1, color='rgb(25,25,25)'),
+                 hoverinfo='none' 
+                )
+
+    axis=dict(showline=False, # hide axis line, grid, ticklabels and  title
+              zeroline=False,
+              showgrid=False,
+              showticklabels=False,
+              title='' 
+              )
+    layout=dict(title= 'My Graph',  
+                font= dict(family='Balto'),
+                width=600,
+                height=600,
+                autosize=False,
+                showlegend=False,
+                xaxis=axis,
+                yaxis=axis,
+                margin=dict(
+                l=40,
+                r=40,
+                b=85,
+                t=100,
+                pad=0,
+
+        ),
+        hovermode='closest',
+        plot_bgcolor='#efecea', #set background color            
+        )
+
+    axis=dict(showline=False, # hide axis line, grid, ticklabels and  title
+              zeroline=False,
+              showgrid=False,
+              showticklabels=False,
+              title=''
+              )
+    
+    layout=dict(title= 'My Graph',  
+                font= dict(family='Balto'),
+                width=600,
+                height=600,
+                autosize=False,
+                showlegend=False,
+                xaxis=axis,
+                yaxis=axis,
+                margin=dict(
+                l=40,
+                r=40,
+                b=85,
+                t=100,
+                pad=0,
+
+        ),
+        hovermode='closest',
+        plot_bgcolor='#efecea', #set background color            
+        )
+
+
+    fig = dict(data=[trace_edges, trace_nodes], layout=layout)
+    iplot(fig)
+
