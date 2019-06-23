@@ -210,7 +210,7 @@ def plot_InfSites_mrca(mrcas,point_up,root_lib,range_theta,height= 500,width= 90
 
 
 def plot_phyl_net(data_phyl,leaves,node_list,edges,nodes_as_seqs= True,root= True):
-    import networkx
+    import networkx as nx
 
     G=nx.Graph()
 
@@ -333,11 +333,11 @@ def plot_phyl_net(data_phyl,leaves,node_list,edges,nodes_as_seqs= True,root= Tru
 
 
 
-def get_ori_graph(root_lib,edges,node_list,present= True,
+def get_ori_graph(root_lib,edges,node_list,leaves,present= True,
                                             nodes_as_seqs= True,
                                             root= True):
     
-    import networkx
+    import networkx as nx
     
     str_data= [''.join([str(x) for x in z]) for z in root_lib[0][-2]]
 
