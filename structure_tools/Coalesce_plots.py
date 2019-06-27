@@ -697,3 +697,31 @@ def PCA_sumplot(Z,zprime,Theta_record,pca_obj,Ncols= 2,PC_select= 2,height= 600,
 #### plot theta in time
 ####
 
+
+def plot_thetatime(pca_record,max_time= 4e5):
+    fig_best_times= []
+
+    for combi in pca_record.keys(): 
+        if len(pca_record[tuple(list(combi))]['comb']):
+            x_plot= np.linspace(1,max_time, 100)
+
+            y_plot= [theta_function(x, pca_record[tuple(list(combi))]['comb']) for x in x_plot]
+
+            fig= go.Scatter(
+                x= x_plot,
+                y= y_plot,
+                mode= 'lines',
+                name= 'prob: {}'.format(round(pca_record[tuple(list(combi))]['probs'], 5))
+            )
+
+            fig_best_times.append(fig)
+
+    layout= go.Layout(
+        title= 'best_times',
+        xaxis= dict(title= 'generations'),
+        yaxis= dict(title= 'theta')
+    )
+
+    Figure= go.Figure(data= fig_best_times, layout= layout)
+    iplot(Figure)
+

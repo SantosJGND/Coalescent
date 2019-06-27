@@ -9,13 +9,13 @@ first time, would have tried my own implementations anyhow. As one should.
 
 ### I. Probability of data under Inifinite Alleles and Infinite Sites models.
 
-Algorithms.
-
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Model_proba.ipynb)
 
 ### II. Time and varying theta.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Time.ipynb)
+
+### Appendix. 
 
 Application to rice data - preliminary.
 
