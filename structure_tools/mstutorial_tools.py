@@ -16,12 +16,7 @@ from plotly import tools
 import plotly.graph_objs as go
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 
-
-
 def Windows_KDE_amova(SequenceStore,admx_lib,refs_lib,ncomps= 4,clsize= 15,supervised= True,amova= True,Bandwidth_split= 20):
-    '''
-    Perform PCA + Mean Shift across windows. Extract Meanshift p-value vectors. Perform amova (optional).
-    '''
     from IPython.display import clear_output
     Geneo= admx_lib
 
@@ -108,7 +103,6 @@ def Windows_KDE_amova(SequenceStore,admx_lib,refs_lib,ncomps= 4,clsize= 15,super
             if supervised:
                 labels= Sup_labels
                 Who= [z for z in it.chain(*[refs_lib[x] for x in ref_order])]
-                labels= [labels[x] for x in Who]
                 Ngps= len(refs_lib)
 
             else:
@@ -127,7 +121,6 @@ def Windows_KDE_amova(SequenceStore,admx_lib,refs_lib,ncomps= 4,clsize= 15,super
                 Results[CHR][c] = [Ngps,Amova1,Amova2,Amova3]
     
     return Results, Construct, PC_var
-
 
 
 def Haplotype_MSlabs(Haplotypes,label_vector,ncomps= 3):
@@ -201,63 +194,18 @@ def Haplotype_MSlabs(Haplotypes,label_vector,ncomps= 3):
     return fig, feats, label_select
 
 
-def MAC_process(Construct,Out,Cl_store,refs_lib,Fam,Names= [],target_var= [],Dr_var= 'all',focus_subset= False,Focus= [],Dr_dim= 4,threshold= 0.1,Method= 'MeanShift'):
+def MAC_process(Construct,Out,Cl_store,refs_lib,Fam,Names= [],target_var= [],Dr_var= 'all',focus_subset= False,Focus= [],Dr_dim= 4,Method= 'MeanShift'):
 
     Coordinates = [[[[CHR,bl,Out[CHR][bl],x] for x in Construct[CHR][bl].keys()] for bl in sorted(Construct[CHR].keys())] for CHR in sorted(Construct.keys())]
     Coordinates = [z for z in it.chain(*[y for y in it.chain([x for x in it.chain(*Coordinates)])])]
 
 
     Coordinates= np.array(Coordinates)
-    
 
-    Clover= [[[Construct[CHR][bl][x] for x in Construct[CHR][bl].keys()] for bl in sorted(Construct[CHR].keys())] for CHR in sorted(Construct.keys())]
+    Clover= [[[Construct[CHR][bl][x] for x in Construct[CHR][bl]] for bl in sorted(Construct[CHR].keys())] for CHR in sorted(Construct.keys())]
     Clover= [z for z in it.chain(*[y for y in it.chain(*Clover)])]
     Clover= np.array(Clover)
     Clover.shape
-    
-    Membership=[]
-    
-    for CHR in sorted(Construct.keys()):
-        for bl in sorted(Construct[CHR].keys()):
-            
-            Bls= sorted(list(Construct[CHR][bl].keys()))
-            pVals= np.array([Construct[CHR][bl][y] for y in Bls])
-            
-            max_vals= np.amax(pVals,axis= 0)
-            max_indx= np.argmax(pVals,axis= 0)
-            
-            inlier= [x for x in range(pVals.shape[1]) if max_vals[x] >= threshold]
-            
-            BL_select= list(set([max_indx[x] for x in inlier]))
-            
-            #print('clusters {} selected. {} %'.format(BL_select,len(BL_select)/float(len(Bls))))
-            
-            if not BL_select:
-                Empty.append([CHR,bl])
-                continue
-            
-            BL_select= { 
-                x: pVals[x] for x in BL_select
-                }
-            
-            Assignment= {
-                    Bls[b]: [x for x in inlier if max_indx[x] == b] for b in BL_select.keys()
-                }
-            
-            for cl in Bls:
-                if cl not in BL_select.keys():
-                    vector= ''
-                else:
-                    vector= '.'.join([str(x) for x in Assignment[cl]])
-                
-                Membership.append(vector)
-
-    
-    #Membership= np.array(Membership)
-    
-    Coordinates= pd.DataFrame(Coordinates,columns= ['chrom','start','end','bl'])
-    Coordinates['members']= Membership
-    
 
     from sklearn import preprocessing
 
@@ -329,6 +277,8 @@ def MAC_process(Construct,Out,Cl_store,refs_lib,Fam,Names= [],target_var= [],Dr_
     label_select = {y:[x for x in range(len(labels1)) if labels1[x] == y] for y in sorted(list(set(labels1)))}
 
 
+
+
     ###############################################################################
     #### Average normalized likelihhod among clustered eigenvectors by haplotype #####
     ###############################################################################
@@ -371,7 +321,7 @@ def MAC_process(Construct,Out,Cl_store,refs_lib,Fam,Names= [],target_var= [],Dr_
 
 
 
-def KDE_pca(feats= [],Cameo= [],label_vector= [],Subset= [],Col_vec= [],height= 2000,width= 1000):
+def KDE_pca(feats= [],Cameo= [],label_vector= [],Subset= [],height= 2000,width= 1000):
     
     Ncols= 2
     titles=['Global']
@@ -413,7 +363,7 @@ def KDE_pca(feats= [],Cameo= [],label_vector= [],Subset= [],Col_vec= [],height= 
 
         else:
             coords= {z:[x for x in Subset if label_vector[x] == z] for z in list(set(label_vector))}
-
+            Col_vec= ['red','yellow','blue','purple','green']
             for i in coords.keys():
                 if coords[i]:
                     trace= go.Scatter(

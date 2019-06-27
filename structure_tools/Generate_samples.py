@@ -180,7 +180,7 @@ def Gen_samples_Rfreqs(Pops,Sizes,vector_lib,Fsts_test,label_package,Origins,pri
         
         Cop_local= {}
         
-        Blocks[Chr][bl]=[]
+        Blocks_truth[Chr][bl]=[]
         
         for gp in Cop_choice.keys():
             cop_func= Cop_choice[gp]['cop_func']

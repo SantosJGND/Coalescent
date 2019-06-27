@@ -13,6 +13,10 @@ Algorithms.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Model_proba.ipynb)
 
+### II. Time and varying theta.
+
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Time.ipynb)
+
 Application to rice data - preliminary.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Inf_sites_rice.ipynb)

@@ -1,5 +1,7 @@
 import numpy as np
 import itertools as it
+import pandas as pd
+
 import plotly.graph_objs as go
 from plotly import tools
 from plotly.offline import iplot
@@ -9,7 +11,10 @@ from structure_tools.Coal_probab import *
 from structure_tools.Coal_tools import get_sinks
 
 import time
-
+from sklearn.neighbors import KernelDensity
+from sklearn.model_selection import GridSearchCV
+from sklearn.cluster import MeanShift, estimate_bandwidth
+from sklearn.decomposition import PCA
 
 import collections
 
@@ -206,6 +211,73 @@ def plot_InfSites_mrca(mrcas,point_up,root_lib,range_theta,height= 500,width= 90
 
 
 
+######
+###### gens haps
+
+
+def plot_InfSites_gens(mrcas,point_up,root_lib,range_theta,Theta= 1,mut_rate= 9e-8,height= 500,width= 900):
+    
+    from structure_tools.Coal_tools import tree_descent_gen
+    
+    hap_frame= [[''.join([str(x) for x in z])] for z in mrcas]
+    hap_frame= list(range(len(mrcas)))
+
+    hap_frame= pd.DataFrame(hap_frame,columns= ['hap_id'])
+    hap_frame["hap"]= [''.join([str(x) for x in z]) for z in mrcas]
+    
+    Ncols= 1
+    titles= [''.join([str(x) for x in y]) for y in mrcas]
+    
+    fig= []
+    vals= []
+
+    for gp in range(len(titles)):
+        
+        title= titles[gp]
+
+        sink, starters= get_sinks(mrcas[gp],root_lib,point_up)
+        
+        t1 = time.time()
+        if len(starters):
+        
+            #node_weigths, paths_reverse = tree_descent(root_lib,point_up,sink,init= starters,Theta= thet)
+
+            #probe_rec= node_weigths[0][0]
+
+            node_weigths, paths_reverse, node_bins, paths_vector = tree_descent_gen(root_lib,point_up,sink,Theta= Theta,mu= mut_rate)
+            
+            paths_vector= paths_reverse[0][0]
+            average_gen= np.mean(paths_vector)
+            
+            vals.append(average_gen)
+    
+    
+    fig = [go.Bar(
+        x= ['hap: {}'.format(x) for x in range(len(titles))],
+        y= vals
+    )]
+            
+    
+    layout = go.Layout(
+        title= 'gens until first hap appearence',
+        barmode='group',
+        xaxis= dict(
+            title= 'hap'
+        ),
+        yaxis= dict(
+            title= 'Gen'
+        )
+    )
+    
+    Figure= go.Figure(data= fig, layout= layout)
+    
+    hap_frame['t']= [round(c,3) for c in vals]
+    
+    return hap_frame, Figure
+
+
+############
+############
 
 
 
@@ -331,6 +403,9 @@ def plot_phyl_net(data_phyl,leaves,node_list,edges,nodes_as_seqs= True,root= Tru
     fig = dict(data=[trace_edges, trace_nodes], layout=layout)
     iplot(fig)
 
+
+###################################
+###################################
 
 
 def get_ori_graph(root_lib,edges,node_list,leaves,present= True,
@@ -467,3 +542,158 @@ def get_ori_graph(root_lib,edges,node_list,leaves,present= True,
 
     fig = dict(data=[trace_edges, trace_nodes], layout=layout)
     iplot(fig)
+
+
+######################
+######################
+
+
+def theta_PCAms_plot(data_combs,Z,N_samp= 50,n_comp= 4):
+    ## Perform PCA
+    n_comp= 4
+    pca = PCA(n_components=n_comp, whiten=False,svd_solver='randomized')
+    ##
+
+    feats_combs= pca.fit_transform(data_combs)
+
+    fig_pca_combs= [go.Scatter3d(
+        x= feats_combs[:,0],
+        y= feats_combs[:,1],
+        z= feats_combs[:,2],
+        mode= 'markers',
+        marker= dict(
+            color= Z.reshape(1,-1)[0],
+            colorscale= 'Viridis'
+        )
+        )
+    ]
+
+    ###
+    ###
+    Z_chose= list(Z.reshape(1,-1)[0])
+    Z_chose= np.argsort(Z_chose)
+
+    Z_chose= Z_chose[(len(Z_chose) - 15):]
+    #Z_chose= [x for x in range(len(Z_vec)) if Z_vec[x] >= 1]
+
+    Z_high= feats_combs[Z_chose]
+
+    print(Z_high.shape)
+    params = {'bandwidth': np.linspace(0.1, 2, 20)}
+    grid = GridSearchCV(KernelDensity(), params, cv=5, iid=False)
+    grid.fit(Z_high)
+
+    kde = grid.best_estimator_
+    new_data = kde.sample(N_samp, random_state=0)
+
+    fig_pca_combs.append(go.Scatter3d(
+        x= new_data[:,0],
+        y= new_data[:,1],
+        z= new_data[:,2],
+        mode= 'markers'))
+
+
+    layout= go.Layout(
+            scene = dict(
+            xaxis = dict(
+                 backgroundcolor="rgb(72,61,139)",
+                 gridcolor="rgb(255, 255, 255)",
+                 showbackground=False,
+                 showgrid= False,
+                 zerolinecolor="rgb(255, 255, 255)",),
+            yaxis = dict(
+                backgroundcolor="rgb(72,61,139)",
+                gridcolor="rgb(255, 255, 255)",
+                showbackground=False,
+                showgrid= False,
+                nticks=0,
+                zerolinecolor="rgb(255, 255, 255)"),
+            zaxis = dict(
+                backgroundcolor="rgb(72,61,139)",
+                gridcolor="rgb(255, 255, 255)",
+                showbackground=False,
+                showgrid= False,
+                zerolinecolor="rgb(255, 255, 255)",),)
+    )
+
+    Figure= go.Figure(data= fig_pca_combs,layout= layout)
+    
+    return Figure, new_data, feats_combs
+
+
+### random search summary
+### 
+
+
+def PCA_sumplot(Z,zprime,Theta_record,pca_obj,Ncols= 2,PC_select= 2,height= 600, width= 1000):
+    titles= ['probab','Ave. PC coordinates among kde sampled theta vectors','loadings of PC {}'.format(PC_select + 1)]
+
+    fig_subplots = tools.make_subplots(rows= int(len(titles) / float(Ncols)) + (len(titles) % Ncols > 0), cols=Ncols,
+                             subplot_titles=tuple(titles))
+    for gp in range(len(titles)):
+        pos1= int(float(gp) / Ncols) + 1
+        pos2= gp - (pos1-1)*Ncols + 1
+
+        title= titles[gp]
+
+        if gp== 0:
+            zprime= Z[Z_chose]
+            bandwidth = estimate_bandwidth(zprime, quantile=0.2, n_samples=500)
+
+            X_plot = np.linspace(-2, 8, 100)[:, np.newaxis]
+
+            kde_plot = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(zprime)
+            log_dens = kde_plot.score_samples(X_plot)
+
+            trace= go.Scatter(x=X_plot[:, 0], y=np.exp(log_dens),
+                                        mode='lines', fill='tozeroy',
+                                        line=dict(color='red', width=2))
+
+            fig_subplots.append_trace(trace, pos1, pos2)
+            fig_subplots.append_trace(fig_dens_I[0], pos1, pos2)
+
+        if gp == 1:
+
+            trace= go.Bar(
+                        x=['PC {}'.format(x + 1) for x in range(new_data.shape[1])],
+                        y=feat_sum,
+                        marker= dict(color= 'rgb(0,0,205)')
+                )
+            fig_subplots.append_trace(trace, pos1, pos2)
+
+            fig_subplots['layout']['yaxis' + str(gp + 1)].update(title='mean')
+
+        if gp == 2:
+
+            times_data= [list(Theta_record[x]['comb'][:,0]) for x in Theta_record.keys()]
+            times_data= np.array(times_data)
+            times_av= np.mean(times_data,axis= 0)
+            times_av= [int(x) for x in times_av / 1000]
+            times_av= ['{}k y'.format(x) for x in times_av]
+
+            Xcomps= pca_obj.components_ 
+
+            trace= go.Bar(
+                        x=times_av,
+                        y=Xcomps[PC_select,:],
+                        marker= dict(color= 'rgb(0,0,205)')
+                )
+
+            fig_subplots.append_trace(trace, pos1, pos2)
+
+            fig_subplots['layout']['yaxis' + str(gp + 1)].update(title='eigen value')
+
+    fig_subplots['layout'].update(height= height, width= width) 
+
+    layout = go.Layout(
+        title= title
+    )
+
+    fig= go.Figure(data=fig_subplots, layout=layout)
+    iplot(fig_subplots)
+
+
+
+#### plot theta in time
+####
+
