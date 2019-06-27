@@ -15,6 +15,10 @@ first time, would have tried my own implementations anyhow. As one should.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Time.ipynb)
 
+### III. Trees and graphs.
+
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Trees_and_graphs.ipynb)
+
 ### Appendix. 
 
 Application to rice data - preliminary.
