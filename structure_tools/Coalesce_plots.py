@@ -477,7 +477,7 @@ def get_ori_graph(root_lib,edges,node_list,leaves,present= True,
     for e in G.edges():
         Xe.extend([pos[e[0]][0], pos[e[1]][0], None])
         Ye.extend([pos[e[0]][1], pos[e[1]][1], None])
-
+    
     trace_edges=dict(type='scatter',
                  mode='lines',
                  x=Xe,
@@ -548,9 +548,9 @@ def get_ori_graph(root_lib,edges,node_list,leaves,present= True,
 ######################
 
 
-def theta_PCAms_plot(data_combs,Z,N_samp= 50,n_comp= 4):
+
+def theta_PCAms_plot(data_combs,Z,N_samp= 50,n_comp= 4,kernel= 'gaussian'):
     ## Perform PCA
-    n_comp= 4
     pca = PCA(n_components=n_comp, whiten=False,svd_solver='randomized')
     ##
 
@@ -572,7 +572,7 @@ def theta_PCAms_plot(data_combs,Z,N_samp= 50,n_comp= 4):
     ###
     Z_chose= list(Z.reshape(1,-1)[0])
     Z_chose= np.argsort(Z_chose)
-
+    
     Z_chose= Z_chose[(len(Z_chose) - 15):]
     #Z_chose= [x for x in range(len(Z_vec)) if Z_vec[x] >= 1]
 
@@ -580,11 +580,11 @@ def theta_PCAms_plot(data_combs,Z,N_samp= 50,n_comp= 4):
 
     print(Z_high.shape)
     params = {'bandwidth': np.linspace(0.1, 2, 20)}
-    grid = GridSearchCV(KernelDensity(), params, cv=5, iid=False)
+    grid = GridSearchCV(KernelDensity(kernel= kernel), params, cv=5, iid=False)
     grid.fit(Z_high)
 
     kde = grid.best_estimator_
-    new_data = kde.sample(N_samp, random_state=0)
+    new_data = kde.sample(N_samp, random_state=1)
 
     fig_pca_combs.append(go.Scatter3d(
         x= new_data[:,0],
@@ -618,14 +618,14 @@ def theta_PCAms_plot(data_combs,Z,N_samp= 50,n_comp= 4):
 
     Figure= go.Figure(data= fig_pca_combs,layout= layout)
     
-    return Figure, new_data, feats_combs
+    return Figure, new_data, feats_combs, pca, Z_chose
 
 
 ### random search summary
 ### 
 
 
-def PCA_sumplot(Z,zprime,Theta_record,pca_obj,Ncols= 2,PC_select= 2,height= 600, width= 1000):
+def PCA_sumplot(Z,Z_chose,Theta_record,pca_obj,fig_dens_I= [], new_data= [],Ncols= 2,PC_select= 2,height= 600, width= 1000):
     titles= ['probab','Ave. PC coordinates among kde sampled theta vectors','loadings of PC {}'.format(PC_select + 1)]
 
     fig_subplots = tools.make_subplots(rows= int(len(titles) / float(Ncols)) + (len(titles) % Ncols > 0), cols=Ncols,
@@ -650,10 +650,12 @@ def PCA_sumplot(Z,zprime,Theta_record,pca_obj,Ncols= 2,PC_select= 2,height= 600,
                                         line=dict(color='red', width=2))
 
             fig_subplots.append_trace(trace, pos1, pos2)
-            fig_subplots.append_trace(fig_dens_I[0], pos1, pos2)
+
+            if len(fig_dens_I):
+                fig_subplots.append_trace(fig_dens_I[0], pos1, pos2)
 
         if gp == 1:
-
+            feat_sum= np.sum(new_data,axis= 0)
             trace= go.Bar(
                         x=['PC {}'.format(x + 1) for x in range(new_data.shape[1])],
                         y=feat_sum,
@@ -700,6 +702,7 @@ def PCA_sumplot(Z,zprime,Theta_record,pca_obj,Ncols= 2,PC_select= 2,height= 600,
 
 def plot_thetatime(pca_record,max_time= 4e5):
     fig_best_times= []
+    from structure_tools.Coal_index import theta_time, theta_function
 
     for combi in pca_record.keys(): 
         if len(pca_record[tuple(list(combi))]['comb']):
@@ -724,4 +727,93 @@ def plot_thetatime(pca_record,max_time= 4e5):
 
     Figure= go.Figure(data= fig_best_times, layout= layout)
     iplot(Figure)
+
+
+#######
+####### plot nodes in pca space.
+
+
+def node_to_pca_plot(data_window, root_lib, leaves, mrca_hap, 
+                    node_list,ref_dict= {}, color_groups= [],
+                    present= True, root= False,
+                    gp_codeName= [],n_comp= 5):
+
+    data_wR= [[int(z[x] != mrca_hap[x]) for x in range(len(mrca_hap))] for z in data_window]
+    pca = PCA(n_components=n_comp, whiten=False,svd_solver='randomized').fit(data_wR)
+
+    feats_w= pca.transform(data_wR)
+
+    ## perform MeanShift clustering.
+    str_data= [''.join([str(x) for x in z]) for z in root_lib[0][-2]]
+
+    for nd in node_list:
+        if nd not in leaves.keys():
+            leaves[nd]= []
+
+
+    seqs= []
+    for nd in node_list:
+        if len(leaves[nd]):
+            seqs.append(leaves[nd])
+
+    seqs= np.array(seqs)
+
+
+    ### colors
+    colz= ['rgb(186,85,211)']*len(seqs)
+
+    if present:
+        list_p= [x for x in range(len(node_list)) if ''.join([str(g) for g in leaves[node_list[x]]]) in str_data]
+        print(list_p)
+        for h in list_p:
+            colz[h]= 'rgb(0,0,205)'
+
+    if root:
+        where_root= node_list.index(-1)
+        colz[where_root]= 'rgb(240,0,0)'
+
+
+    feats_nodes= pca.transform(seqs)
+
+    fig_net_pc= [
+        go.Scatter3d(
+        x= feats_nodes[:,0],
+        y= feats_nodes[:,1],
+        z= feats_nodes[:,2],
+        mode= 'markers',
+        marker= dict(
+            size= 20,
+            color= colz,
+            opacity= 1
+        )
+        )
+    ]
+
+    ### Hap data
+    ### Hap grp
+    if len(ref_dict):
+
+        if not len(gp_codeName):
+            gp_codeName= ['gp {}'.format(x) for x in range(len(ref_dict))]
+
+        if not len(color_groups):
+            color_groups= ['rgb(0,0,205)'] * len(ref_dict)
+        ##
+
+        trace1= [go.Scatter3d(
+            x= feats_w[ref_dict[i],0],
+            y= feats_w[ref_dict[i],1],
+            z= feats_w[ref_dict[i],2],
+            mode= 'markers',
+            name= gp_codeName[i],
+            marker= dict(
+                size= 5,
+                color= color_groups[i],
+                opacity= 1
+            )
+            ) for i in ref_dict.keys()]
+
+        fig_net_pc.extend(trace1)
+    
+    return fig_net_pc
 

@@ -9,7 +9,7 @@ first time, would have tried my own implementations anyhow. As one should.
 
 ### I. Probability of data under Inifinite Alleles and Infinite Sites models.
 
-- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Model_proba.ipynb)
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Models_coalescence.ipynb)
 
 ### II. Time and varying theta.
 
@@ -19,8 +19,9 @@ first time, would have tried my own implementations anyhow. As one should.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Trees_and_graphs.ipynb)
 
+
 ### Appendix. 
 
 Application to rice data - preliminary.
 
-- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Inf_sites_rice.ipynb)
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/vcf_application_rice.ipynb)

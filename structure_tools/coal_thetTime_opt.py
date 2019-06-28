@@ -136,7 +136,8 @@ from IPython.display import clear_output
 def pca_optimize(feats_combi,data_combs,Z_vec,pca_ob,
 			root_lib,point_up,sink,
 			N_samps= 50,Nlayers= 10,max_time= 4e5, 
-			Ngaps= 5,Ncomps= 4,thresh_z= 2,wait_p= 10):
+			Ngaps= 5,Ncomps= 4,thresh_z= 2,wait_p= 10,
+			kernel= 'tophat', up_t= 15):
     
     from structure_tools.Coal_index import theta_time, theta_function, tree_ascent_times
     from sklearn.decomposition import PCA
@@ -155,17 +156,17 @@ def pca_optimize(feats_combi,data_combs,Z_vec,pca_ob,
         Z_ch= list(Z_vec.reshape(1,-1)[0])
         Z_ch= np.argsort(Z_ch)
         
-        if len(Z_ch) < 15:
+        if len(Z_ch) < up_t:
             return prob_mean, prob_median, prob_sd, new_data, Theta_record
         
-        Z_ch= Z_ch[(len(Z_ch) - 15):]
+        Z_ch= Z_ch[(len(Z_ch) - up_t):]
         #Z_ch= [x for x in range(len(Z_vec)) if Z_vec[x] >= 1]
         
         Z_high= feats_combi[Z_ch]
 
         print(Z_high.shape)
         params = {'bandwidth': np.linspace(0.1, 2, 20)}
-        grid = GridSearchCV(KernelDensity(), params, cv=5, iid=False)
+        grid = GridSearchCV(KernelDensity(kernel= kernel), params, cv=5, iid=False)
         grid.fit(Z_high)
         
         kde = grid.best_estimator_
@@ -223,7 +224,6 @@ def pca_optimize(feats_combi,data_combs,Z_vec,pca_ob,
         waited= 0
         
         prob_mean.append(mean_p)
-        
         prob_median.append(median_p)
         prob_sd.append(np.std(probs_vector))
         

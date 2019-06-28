@@ -651,3 +651,125 @@ def get_sound_coords(pc_coords_s,sampleRate = 44100,
 
     return fig_freqs, y
 
+
+
+
+########
+######## Extract single window for coalescence graph.
+
+
+
+def get_window(wind_select, Windows, Chr= 1, sub_sel_method= 'ms',
+               max_sample= 50,
+                Ng= 2,
+                Anc_pop_1= False,
+                mrca_pop= 1,
+              unique_haps= True):
+    
+    from structure_tools.Coal_index import get_config
+
+    data_window= list(Windows[Chr][wind_select])
+    data_window= np.array(data_window)
+    #data_w= data_w[code_lib[popA]]
+    data_window[data_window==1]= 0
+    data_window[data_window==2]= 1
+
+
+    # max number of samples from this pop
+
+
+    # windows. by snp.
+    # population. Use label in PCA plot in function of label source selected.
+
+    ### rand sample
+    if sub_sel_method == 'rand':
+        vec_samp= np.random.choice(list(range(data_window.shape[0])),max_sample,replace= False)
+
+
+    if sub_sel_method == 'ms':
+        ## mean shift sample:
+        ## Perform PCA
+        n_comp= 4
+        pca = PCA(n_components=n_comp, whiten=False,svd_solver='randomized')
+
+        featsw= pca.fit_transform(data_window)
+
+        ## perform MeanShift clustering.
+
+        bandwidth = estimate_bandwidth(featsw, quantile=0.3)
+
+        ms = MeanShift(bandwidth=bandwidth, bin_seeding=False, cluster_all=False, min_bin_freq=5)
+        ms.fit(featsw)
+        labels_local = ms.labels_
+        label_local_select = {y:[x for x in range(len(labels_local)) if labels_local[x] == y] for y in sorted(list(set(labels_local)))}
+
+        vec_samp= [list(np.random.choice(label_local_select[z],Ng)) for z in label_local_select.keys()]
+        vec_samp= list(it.chain(*vec_samp))
+    
+    
+    if Anc_pop_1:
+
+        ###
+        mrca_idx= np.random.choice(ref_dict[mrca_pop],1)[0]
+        mrca_hap= list(data_window[mrca_idx])
+
+        #data_window[mrca_idx]= np.zeros(len(mrca_hap))
+
+
+    #######
+
+    vec_samp= sorted(vec_samp)
+    data_w= data_window[vec_samp,:]
+
+    if Anc_pop_1:
+        data_w= [[int(z[x] != mrca_hap[x]) for x in range(len(mrca_hap))] for z in data_w]
+        if mrca_idx in vec_samp:
+            data_w[vec_samp.index(mrca_idx)]= [0] * len(mrca_hap)
+
+        data_w= np.array(data_w)
+
+    print(data_w.shape)
+
+    dataT= data_w
+    hap_str= [''.join([str(x) for x in r]) for r in dataT]
+    
+    if unique_haps:
+        hap_int= [int(x,2) for x in hap_str]
+        hap_ord= np.argsort(hap_int)
+        hap_int= [hap_int[x] for x in hap_ord]
+
+        hap_ord= [hap_ord[x] for x in range(1,len(hap_int)) if hap_int[x] != hap_int[x-1] ]
+        hap_ord= [0,*hap_ord]
+
+        hap_str= [hap_str[x] for x in hap_ord]
+        hap_str= list(set(hap_str))
+
+
+    hap_sol= hap_str
+
+    dataT= np.array([np.array(list(x),dtype= int) for x in hap_sol])
+    #hap_sun= dataT
+
+    nsamp= dataT.shape[0]
+
+    print(dataT.shape)
+    config_dataw, hap_str_I= get_config(dataT,nsamp)
+
+    hap_sun= np.array([np.array(list(x),dtype= int) for x in hap_sol])
+
+    hap_size= [len(hap_str_I[x]) for x in hap_sol]
+    hap_size= {z:[x for x in range(len(hap_size)) if hap_size[x] == z] for z in list(set(hap_size))}
+
+    passing= hap_size.keys()
+
+    pack= list(it.chain(*[hap_size[x] for x in passing]))
+    passport= list(it.chain(*[[x]*len(hap_size[x]) for x in passing]))
+
+    pack= [[pack[x],passport[x]] for x in range(len(pack))]
+    pack= sorted(pack)
+    pack= np.array(pack)
+    
+    return pack, hap_sun, dataT, data_window
+
+
+
