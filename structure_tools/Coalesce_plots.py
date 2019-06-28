@@ -251,7 +251,11 @@ def plot_InfSites_gens(mrcas,point_up,root_lib,range_theta,Theta= 1,mut_rate= 9e
             
             vals.append(average_gen)
     
-    
+    sort_vals= np.argsort(vals)
+    vals= [vals[x] for x in sort_vals]
+    titles= [titles[x] for x in sort_vals]
+
+
     fig = [go.Bar(
         x= ['hap: {}'.format(x) for x in range(len(titles))],
         y= vals
@@ -272,6 +276,7 @@ def plot_InfSites_gens(mrcas,point_up,root_lib,range_theta,Theta= 1,mut_rate= 9e
     Figure= go.Figure(data= fig, layout= layout)
     
     hap_frame['t']= [round(c,3) for c in vals]
+    hap_frame= hap_frame.sort_values('t')
     
     return hap_frame, Figure
 
