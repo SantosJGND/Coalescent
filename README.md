@@ -13,11 +13,11 @@ first time, would have tried my own implementations anyhow. As one should.
 
 ### II. Trees and graphs.
 
-		i. tree construction and evaluation. network analysis.
+> i. tree construction and evaluation. network analysis.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Trees_and_graphs.ipynb)	
 
-		ii. Coalescent properties.
+> ii. Coalescent properties.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Coalescence_probability.ipynb)
 
