@@ -11,13 +11,20 @@ first time, would have tried my own implementations anyhow. As one should.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Models_coalescence.ipynb)
 
-### II. Time and varying theta.
+### II. Trees and graphs.
 
-- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Time.ipynb)
-
-### III. Trees and graphs.
+	i.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Trees_and_graphs.ipynb)
+
+	ii.
+
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Coalescence_probability.ipynb)
+
+
+### III. Time and varying theta.
+
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Time.ipynb)
 
 
 ### Appendix. 
@@ -25,3 +32,4 @@ first time, would have tried my own implementations anyhow. As one should.
 Application to rice data - preliminary.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/vcf_application_rice.ipynb)
+
