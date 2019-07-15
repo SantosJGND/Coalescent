@@ -33,6 +33,15 @@ first time, would have tried my own implementations anyhow. As one should.
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Time.ipynb)
 
 
+### IV. Simulations.
+
+> Geometric and exponential waiting times.
+
+> algorithms for coalescent simulations.
+
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Simulations.ipynb)
+
+
 ### Appendix. 
 
 Application to rice data - preliminary.
