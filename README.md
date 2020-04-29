@@ -42,6 +42,10 @@ first time, would have tried my own implementations anyhow. As one should.
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Simulations.ipynb)
 
 
+### V. Sampling.
+
+> Expected sampling variance.
+
 ### Appendix. 
 
 Application to rice data - preliminary.
