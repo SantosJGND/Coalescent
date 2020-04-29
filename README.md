@@ -46,7 +46,7 @@ first time, would have tried my own implementations anyhow. As one should.
 
 > Expected sampling variance.
 
-- [PAs](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/coalescent_sampling.ipynb)
+- [PAs](https://nbviewer.jupyter.org/github/SantosJGND/Tools_and_toys/blob/master/coalescent_sampling.ipynb)
 
 ### Appendix. 
 
