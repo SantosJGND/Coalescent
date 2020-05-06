@@ -9,7 +9,7 @@ first time, would have tried my own implementations anyhow. As one should.
 
 ### I. Inifinite Alleles and Infinite Sites models.
 
-> Recursive and exact algorithms. 
+> Recursive and exact algorithms.
 
 > Haplotype and mutation expectations under the coalescent. 
 
