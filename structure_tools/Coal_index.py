@@ -1,6 +1,6 @@
 import math
 import numpy as np
-
+import itertools as it
 import collections
 
 def recursively_default_dict():
@@ -20,6 +20,47 @@ def get_config(dataw,nsamp):
     
     config= [sum(class_len == x) for x in range(1,nsamp + 1)]
     return config, hap_str
+
+
+
+def process_array(dataT):
+    '''
+    Prepare haplotype array for coalescence inference algorithms.
+    see: https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Models_coalescence.ipynb
+    
+    '''
+    nsamp= dataT.shape[0]
+
+    config_dataw, hap_str= get_config(dataT,nsamp)
+
+    hap_sol= list(hap_str.keys())
+    hap_sun= np.array([np.array(list(x),dtype= int) for x in hap_sol])
+
+    hap_size= [len(hap_str[x]) for x in hap_sol]
+    hap_size= {z:[x for x in range(len(hap_size)) if hap_size[x] == z] for z in list(set(hap_size))}
+
+
+
+    passing= hap_size.keys()
+    pack= list(it.chain(*[hap_size[x] for x in passing]))
+    passport= list(it.chain(*[[x]*len(hap_size[x]) for x in passing]))
+
+    pack= [[pack[x],passport[x]] for x in range(len(pack))]
+    pack= sorted(pack)
+    pack= np.array(pack)
+
+    Dict_mat= {0: 
+               {
+                   -2: hap_sun,
+                   -1: [0] * hap_sun.shape[0],
+                   0: pack
+                  }
+              }
+
+    point_up= recursively_default_dict()
+    
+    return Dict_mat, point_up
+
 
 
 def Inf_sites(Dict_mat,point_up,layer_range= 10, print_layer= True,print_time= True,sub_sample= 0, poppit= False):

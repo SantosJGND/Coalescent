@@ -17,6 +17,11 @@ first time, would have tried my own implementations anyhow. As one should.
 
 - [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Models_coalescence.ipynb)
 
+
+> Example application - array support.
+
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Faisal_List.ipynb)
+
 ### II. Trees and graphs.
 
 > i. tree construction and evaluation. network analysis.
