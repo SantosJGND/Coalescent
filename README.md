@@ -20,7 +20,7 @@ first time, would have tried my own implementations anyhow. As one should.
 
 > Example application - array support.
 
-- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/master/Faisal_List.ipynb)
+- [Notebook](https://nbviewer.jupyter.org/github/SantosJGND/Coalescent/blob/48608c1544ac8869d175ae41c557bb376a7d420a/Faisal_List.ipynb)
 
 ### II. Trees and graphs.
 
